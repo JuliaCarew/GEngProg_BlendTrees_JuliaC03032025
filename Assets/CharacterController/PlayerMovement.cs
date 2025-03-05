@@ -7,13 +7,17 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D playerRigidbody;
     private Vector2 moveDirection;
 
-    Animator animator;
+    public Animator animator;
     
     void Awake()
     {
-        animator = this.GetComponent<Animator>();
+        animator = this.GetComponentInChildren<Animator>(); // on the child bc Sprite has Animator component
         playerRigidbody = this.GetComponent<Rigidbody2D>();
         InputActions.MoveEvent += UpdateMoveVector;
+    }
+    private void Update()
+    {
+        HandleAnim();
     }
 
     private void UpdateMoveVector(Vector2 inputVector) // player input = moveVector(current vector2 from HandlePlayerMove)
@@ -35,15 +39,23 @@ public class PlayerMovement : MonoBehaviour
         InputActions.MoveEvent -= UpdateMoveVector;
     }
 
-    private void HandleAnim(Vector2 moveVector) // pass Vector2 ?
+    /// <summary>
+    /// Swap between animations in the blend tree based on 
+    /// horizontal/vertical input vector. Handles idle state as well.
+    /// </summary>
+    private void HandleAnim() 
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        Vector2 movement = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
-        // animator float based on movement direction to play directional anim
-        animator.SetFloat("moveVector", horizontal);
-        animator.SetFloat("moveVector", vertical);
+        if (movement.magnitude != 0)
+        {
+            animator.SetFloat("Horizontal", movement.y);
+            animator.SetFloat("Vertical", movement.x);
+            animator.SetBool("Moving",true);
+        }
+        else {
+            animator.SetBool("Moving", false);
+        }
     }
 }
-// pass through movement vector and switch based on horiz vert values
 // spritesheet link https://opengameart.org/content/lpc-full-plate-golden-armor 
